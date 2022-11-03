@@ -129,12 +129,10 @@ class MainActivity : AppCompatActivity() {
                 progressBar.isVisible = true
                 button.isEnabled = false
                 val deferredCity = lifecycleScope.async {
-                    val city = loadCity()
-                    city
+                    loadCity()
                 }
                 val deferredTemp = lifecycleScope.async {
-                    val temp = loadTemperature()
-                    temp
+                    loadTemperature()
                 }
                 lifecycleScope.launch {
                     val city = deferredCity.await()
