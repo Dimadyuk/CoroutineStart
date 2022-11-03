@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         val city = loadCity()
 
         binding.tvLocation.text = city
-        val temp = loadTemperature(city)
+        val temp = loadTemperature()
 
         binding.tvTemperature.text = temp.toString()
         binding.progressBar.isVisible = false
@@ -103,14 +103,14 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private suspend fun loadTemperature(city: String): Int {
+    private suspend fun loadTemperature(): Int {
 
 
-        Toast.makeText(
-            this,
-            "Loading temperature for city: $city",
-            Toast.LENGTH_SHORT
-        ).show()
+//        Toast.makeText(
+//            this,
+//            "Loading temperature for city: $city",
+//            Toast.LENGTH_SHORT
+//        ).show()
 
         delay(2000)
 
@@ -125,10 +125,25 @@ class MainActivity : AppCompatActivity() {
             progressBar.isVisible = false
 
             button.setOnClickListener {
-//                lifecycleScope.launch {
-//                    loadData()
-//                }
-                loadWithoutCoroutine()
+                progressBar.isVisible = true
+                button.isEnabled = false
+                val jobCity = lifecycleScope.launch {
+                    val city = loadCity()
+                    tvLocation.isVisible = true
+                    tvLocation.text = city
+                }
+                val jobTemp = lifecycleScope.launch {
+                    val temp = loadTemperature()
+                    tvTemperature.isVisible = true
+                    tvTemperature.text = temp.toString()
+                }
+                lifecycleScope.launch {
+                    jobCity.join()
+                    jobTemp.join()
+                    progressBar.isVisible = false
+                    button.isEnabled = true
+                }
+                //loadWithoutCoroutine()
             }
         }
     }
