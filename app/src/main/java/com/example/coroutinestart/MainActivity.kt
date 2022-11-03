@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.example.coroutinestart.databinding.ActivityMainBinding
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.security.auth.callback.Callback
@@ -127,19 +128,27 @@ class MainActivity : AppCompatActivity() {
             button.setOnClickListener {
                 progressBar.isVisible = true
                 button.isEnabled = false
-                val jobCity = lifecycleScope.launch {
+                val deferredCity = lifecycleScope.async {
                     val city = loadCity()
-                    tvLocation.isVisible = true
-                    tvLocation.text = city
+                    city
                 }
-                val jobTemp = lifecycleScope.launch {
+                val deferredTemp = lifecycleScope.async {
                     val temp = loadTemperature()
-                    tvTemperature.isVisible = true
-                    tvTemperature.text = temp.toString()
+                    temp
                 }
                 lifecycleScope.launch {
-                    jobCity.join()
-                    jobTemp.join()
+                    val city = deferredCity.await()
+                    val temp = deferredTemp.await()
+                    tvLocation.isVisible = true
+                    tvLocation.text = city
+                    tvTemperature.isVisible = true
+                    tvTemperature.text = temp.toString()
+
+                    Toast.makeText(
+                        this@MainActivity,
+                        "city: $city - temp: $temp",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     progressBar.isVisible = false
                     button.isEnabled = true
                 }
