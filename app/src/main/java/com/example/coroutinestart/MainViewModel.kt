@@ -3,13 +3,11 @@ package com.example.coroutinestart
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.*
-import java.lang.Exception
-import java.lang.RuntimeException
 
 
 class MainViewModel : ViewModel() {
 
-    private val parentJob = Job()
+    private val parentJob = SupervisorJob()
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.d(LOG_TAG, "Exception caught: $throwable")
     }
@@ -28,10 +26,13 @@ class MainViewModel : ViewModel() {
             Log.d(LOG_TAG, "second coroutine finished")
         }
 
-        val childJob3 = coroutineScope.launch {
+        val childJob3 = coroutineScope.async {
             delay(1000)
             error()
             Log.d(LOG_TAG, "third coroutine finished")
+        }
+        coroutineScope.launch {
+            childJob3.await()
         }
     }
 
